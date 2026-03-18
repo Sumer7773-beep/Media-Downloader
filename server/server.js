@@ -171,14 +171,19 @@ app.post('/api/info', async (req, res) => {
       return res.status(400).json({ error: 'Invalid URL. Please provide a valid video URL' });
     }
 
+    console.log('Fetching info for URL:', url);
+    console.log('Platform detected:', platform);
+
     const info = await youtubedl(url, {
       dumpSingleJson: true,
       noCheckCertificates: true,
       noWarnings: true,
       preferFreeFormats: true,
       flatPlaylist: true, // Get playlist info
+      skipDownload: true, // Don't download, just get info
     });
 
+    console.log('Video info fetched successfully');
     // Check if it's a playlist
     const isPlaylist = info._type === 'playlist' || (info.entries && info.entries.length > 1);
     
@@ -222,7 +227,15 @@ app.post('/api/info', async (req, res) => {
     res.json(videoDetails);
   } catch (error) {
     console.error('Error fetching video info:', error);
-    res.status(500).json({ error: 'Failed to fetch video information' });
+    console.error('Error details:', error.message);
+    console.error('Error stderr:', error.stderr);
+    
+    // Send more detailed error message
+    const errorMessage = error.stderr || error.message || 'Failed to fetch video information';
+    res.status(500).json({ 
+      error: 'Failed to fetch video information. The video might be private, age-restricted, or unavailable.',
+      details: errorMessage.substring(0, 200) // First 200 chars of error
+    });
   }
 });
 
