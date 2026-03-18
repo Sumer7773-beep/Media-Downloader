@@ -13,7 +13,18 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-app.use(cors());
+// Configure CORS to allow Vercel domain
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://media-downloader-azure.vercel.app',
+    'https://media-downloader-j05jimglc-akshararana7773-7696s-projects.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Validate YouTube URL
