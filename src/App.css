@@ -207,6 +207,64 @@ body {
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
+  margin-bottom: 20px;
+}
+
+.playlist-banner {
+  background: linear-gradient(135deg, rgba(120, 119, 198, 0.2) 0%, rgba(255, 107, 107, 0.2) 100%);
+  border: 1px solid rgba(120, 119, 198, 0.3);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  backdrop-filter: blur(10px);
+}
+
+.playlist-banner svg {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.playlist-banner strong {
+  color: rgba(120, 119, 198, 1);
+  margin-right: 8px;
+}
+
+.playlist-count {
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 8px;
+  font-size: 0.9rem;
+}
+
+.supported-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 0 20px;
+}
+
+.platform-chip {
+  background: rgba(120, 119, 198, 0.15);
+  border: 1px solid rgba(120, 119, 198, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.platform-chip:hover {
+  background: rgba(120, 119, 198, 0.25);
+  border-color: rgba(120, 119, 198, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(120, 119, 198, 0.2);
 }
 
 .download-form {
@@ -667,6 +725,38 @@ body {
 .format-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.playlist-option {
+  background: rgba(120, 119, 198, 0.1);
+  border: 1px solid rgba(120, 119, 198, 0.2);
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+}
+
+.playlist-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.playlist-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #7877c6;
+}
+
+.playlist-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
 }
 
 .quality-section {
@@ -1165,6 +1255,7 @@ body {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.4;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 
-const API_URL = 'http://localhost:3002/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 
 function App() {
   const [url, setUrl] = useState('');
@@ -19,6 +19,10 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [availableFormats, setAvailableFormats] = useState([]);
+  const [isPlaylist, setIsPlaylist] = useState(false);
+  const [playlistInfo, setPlaylistInfo] = useState(null);
+  const [downloadPlaylist, setDownloadPlaylist] = useState(false);
 
   const validateYouTubeUrl = (url) => {
     const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
@@ -54,6 +58,9 @@ function App() {
     setFetchingInfo(true);
     setError('');
     setVideoInfo(null);
+    setAvailableFormats([]);
+    setIsPlaylist(false);
+    setPlaylistInfo(null);
 
     try {
       const response = await fetch(`${API_URL}/info`, {
@@ -65,6 +72,21 @@ function App() {
       if (response.ok) {
         const data = await response.json();
         setVideoInfo(data);
+        
+        // Check if it's a playlist
+        if (data.isPlaylist) {
+          setIsPlaylist(true);
+          setPlaylistInfo({
+            title: data.playlistTitle,
+            count: data.playlistCount,
+            videos: data.playlistVideos || []
+          });
+        }
+        
+        // Set available formats if provided
+        if (data.formats && data.formats.length > 0) {
+          setAvailableFormats(data.formats);
+        }
         
         // Set video URL for player (works best with YouTube)
         if (data.platform === 'youtube') {
@@ -108,7 +130,7 @@ function App() {
       const response = await fetch(`${API_URL}/download`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, format, quality }),
+        body: JSON.stringify({ url, format, quality, downloadPlaylist: isPlaylist && downloadPlaylist }),
       });
 
       if (!response.ok) {
@@ -257,7 +279,22 @@ function App() {
             </svg>
           </div>
           <h1 className="title">Universal Video Downloader</h1>
-          <p className="subtitle">Download videos from 1000+ websites or search songs</p>
+          <p className="subtitle">Download from YouTube, Instagram, TikTok, Facebook, Twitter, Reddit, Vimeo, Twitch & 1000+ sites</p>
+          
+          <div className="supported-platforms">
+            <span className="platform-chip">📺 YouTube</span>
+            <span className="platform-chip">📷 Instagram</span>
+            <span className="platform-chip">🎵 TikTok</span>
+            <span className="platform-chip">👥 Facebook</span>
+            <span className="platform-chip">🐦 Twitter/X</span>
+            <span className="platform-chip">🔴 Reddit</span>
+            <span className="platform-chip">🎬 Vimeo</span>
+            <span className="platform-chip">📹 Dailymotion</span>
+            <span className="platform-chip">🎮 Twitch</span>
+            <span className="platform-chip">📌 Pinterest</span>
+            <span className="platform-chip">✈️ Telegram</span>
+            <span className="platform-chip">🌐 +1000 more</span>
+          </div>
         </div>
 
         {/* Search Section */}
@@ -327,7 +364,7 @@ function App() {
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Paste any video URL here (YouTube, Instagram, Twitter, Facebook, TikTok, etc.)..."
+              placeholder="Paste video URL (YouTube, Instagram, TikTok, Facebook, Twitter, Reddit, Vimeo, Twitch, Pinterest, Telegram & 1000+ sites)..."
               className="url-input"
               disabled={loading || fetchingInfo}
             />
@@ -349,6 +386,17 @@ function App() {
 
           {videoInfo && (
             <div className="video-info-card">
+              {isPlaylist && playlistInfo && (
+                <div className="playlist-banner">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>
+                  </svg>
+                  <div>
+                    <strong>Playlist:</strong> {playlistInfo.title}
+                    <span className="playlist-count">({playlistInfo.count} videos)</span>
+                  </div>
+                </div>
+              )}
               <div className="video-preview" onClick={videoUrl ? handlePlayVideo : undefined} style={{ cursor: videoUrl ? 'pointer' : 'default' }}>
                 {videoInfo.thumbnail && (
                   <img src={videoInfo.thumbnail} alt={videoInfo.title} className="video-thumbnail" />
@@ -388,6 +436,14 @@ function App() {
                       {videoInfo.platform === 'youtube' ? '📺 YouTube' : 
                        videoInfo.platform === 'instagram' ? '📷 Instagram' : 
                        videoInfo.platform === 'twitter' ? '🐦 Twitter/X' :
+                       videoInfo.platform === 'tiktok' ? '🎵 TikTok' :
+                       videoInfo.platform === 'facebook' ? '👥 Facebook' :
+                       videoInfo.platform === 'vimeo' ? '🎬 Vimeo' :
+                       videoInfo.platform === 'dailymotion' ? '📹 Dailymotion' :
+                       videoInfo.platform === 'reddit' ? '🔴 Reddit' :
+                       videoInfo.platform === 'twitch' ? '🎮 Twitch' :
+                       videoInfo.platform === 'pinterest' ? '📌 Pinterest' :
+                       videoInfo.platform === 'telegram' ? '✈️ Telegram' :
                        '🌐 ' + (new URL(url).hostname.replace('www.', ''))}
                     </span>
                   )}
@@ -427,6 +483,23 @@ function App() {
             </button>
           </div>
 
+          {isPlaylist && (
+            <div className="playlist-option">
+              <label className="playlist-checkbox">
+                <input
+                  type="checkbox"
+                  checked={downloadPlaylist}
+                  onChange={(e) => setDownloadPlaylist(e.target.checked)}
+                  disabled={loading}
+                />
+                <span>Download entire playlist ({playlistInfo?.count || 0} videos)</span>
+              </label>
+              <p className="playlist-note">
+                ⚠️ Downloading playlists may take a long time. Each video will be downloaded separately.
+              </p>
+            </div>
+          )}
+
           <div className="quality-section">
             <label className="quality-label">
               <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
@@ -435,39 +508,93 @@ function App() {
               Quality
             </label>
             <div className="quality-selector">
-              <button
-                type="button"
-                className={`quality-btn ${quality === 'highest' ? 'active' : ''}`}
-                onClick={() => setQuality('highest')}
-                disabled={loading}
-              >
-                <span className="quality-badge best">Best</span>
-                Highest
-              </button>
-              <button
-                type="button"
-                className={`quality-btn ${quality === 'high' ? 'active' : ''}`}
-                onClick={() => setQuality('high')}
-                disabled={loading}
-              >
-                High
-              </button>
-              <button
-                type="button"
-                className={`quality-btn ${quality === 'medium' ? 'active' : ''}`}
-                onClick={() => setQuality('medium')}
-                disabled={loading}
-              >
-                Medium
-              </button>
-              <button
-                type="button"
-                className={`quality-btn ${quality === 'low' ? 'active' : ''}`}
-                onClick={() => setQuality('low')}
-                disabled={loading}
-              >
-                Low
-              </button>
+              {format === 'audio' ? (
+                <>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'highest' ? 'active' : ''}`}
+                    onClick={() => setQuality('highest')}
+                    disabled={loading}
+                  >
+                    320kbps
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'high' ? 'active' : ''}`}
+                    onClick={() => setQuality('high')}
+                    disabled={loading}
+                  >
+                    256kbps
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'medium' ? 'active' : ''}`}
+                    onClick={() => setQuality('medium')}
+                    disabled={loading}
+                  >
+                    192kbps
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'low' ? 'active' : ''}`}
+                    onClick={() => setQuality('low')}
+                    disabled={loading}
+                  >
+                    128kbps
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'lowest' ? 'active' : ''}`}
+                    onClick={() => setQuality('lowest')}
+                    disabled={loading}
+                  >
+                    96kbps
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'highest' ? 'active' : ''}`}
+                    onClick={() => setQuality('highest')}
+                    disabled={loading}
+                  >
+                    4K
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'high' ? 'active' : ''}`}
+                    onClick={() => setQuality('high')}
+                    disabled={loading}
+                  >
+                    2K
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'medium' ? 'active' : ''}`}
+                    onClick={() => setQuality('medium')}
+                    disabled={loading}
+                  >
+                    1080p
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'low' ? 'active' : ''}`}
+                    onClick={() => setQuality('low')}
+                    disabled={loading}
+                  >
+                    720p
+                  </button>
+                  <button
+                    type="button"
+                    className={`quality-btn ${quality === 'lowest' ? 'active' : ''}`}
+                    onClick={() => setQuality('lowest')}
+                    disabled={loading}
+                  >
+                    480p
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -530,7 +657,6 @@ function App() {
               <iframe
                 src={videoUrl}
                 title="Video Player"
-                frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="video-player"
