@@ -179,8 +179,16 @@ app.post('/api/info', async (req, res) => {
       noCheckCertificates: true,
       noWarnings: true,
       preferFreeFormats: true,
-      flatPlaylist: true, // Get playlist info
-      skipDownload: true, // Don't download, just get info
+      flatPlaylist: true,
+      skipDownload: true,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      addHeader: [
+        'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language:en-us,en;q=0.5',
+        'Sec-Fetch-Mode:navigate'
+      ],
+      extractorArgs: 'youtube:player_client=android,web'
     });
 
     console.log('Video info fetched successfully');
@@ -259,7 +267,9 @@ app.post('/api/download', async (req, res) => {
       dumpSingleJson: true,
       noCheckCertificates: true,
       noWarnings: true,
-      flatPlaylist: downloadPlaylist ? false : true, // Download playlist if requested
+      flatPlaylist: downloadPlaylist ? false : true,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      extractorArgs: 'youtube:player_client=android,web'
     });
 
     const title = (info.title || 'video').replace(/[^\w\s-]/gi, '').replace(/\s+/g, '_');
@@ -275,9 +285,14 @@ app.post('/api/download', async (req, res) => {
       noCheckCertificates: true,
       noWarnings: true,
       preferFreeFormats: true,
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      extractorArgs: 'youtube:player_client=android,web',
       addHeader: [
         'referer:youtube.com',
-        'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language:en-us,en;q=0.5',
+        'Sec-Fetch-Mode:navigate'
       ],
     };
 
